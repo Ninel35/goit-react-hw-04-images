@@ -1,95 +1,89 @@
-import { Component } from "react";
-import { Searchbar } from "./Searchbar";
-import { ImageGallery } from "./ImageGallery";
 import { getAllImages } from "api/allImages";
+import { Searchbar } from "./Searchbar";
 import { Loader } from "./Loader";
+import { IoSearch } from "react-icons/io5";
+import { ImageGallery } from "./ImageGallery";
+import { MyModal } from "./Modal";
 import { Button } from "./Button";
 import { ImageGalleryItem } from "./ImageGalleryItem";
-import { MyModal } from "./Modal";
-import { IoSearch } from "react-icons/io5";
+import { useEffect, useState } from "react";
+
+export const App = () => {
+  const [query, setQuery] = useState('')
+  const [images, setImages] = useState(null)
+  const [page, setPage] = useState(1)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState(null)
+  const [loadMore, setLoadMore] = useState(false)
+  const [largeImg, setLargeImg] = useState('')
+  const [tags, setTags] = useState('')
+  const [isShownModal, setIsShowModal] = useState(false)
 
 
-export class App extends Component {
-  state = {
-    query: '',
-    images: null,
-    page: 1,
-    isLoading: false,
-    error: null,
-    loadMore: false,
-    largeImg: '',
-    tags: '',
-    isShownModal: false
-  }
-
+  useEffect(() => {
+    if(query) getImages(query, page)
+  }, [query, page])
  
 
-  componentDidUpdate(_, prevState) {
-    const { query, page} = this.state
-    if (prevState.query !== query || prevState.page !== page) {
-    this.getImages(query, page)
-  }
-  }
-
-   openModal = (largeImg, tags) => {
-    this.setState({ isShownModal: true, largeImg, tags })
+  const openModal = (largeImg, tags) => {
+    setIsShowModal(true)
+    setLargeImg(largeImg)
+    setTags(tags)
   }
 
-  closeModal = () => {
-    this.setState({ isShownModal: false, largeImg: '', tags: '' })
+  const closeModal = () => {
+     setIsShowModal(false)
+    setLargeImg('')
+    setTags('')
   }
 
-    getImages = async (query, page) => {
-    this.setState({ isLoading: true });
+  const getImages = async (query, page) => {
+      setIsLoading(true)
     try {
       const response = await getAllImages(query, page);
 
       if (response.hits.length === 0) return;
 
-      this.setState(prev => {
-        return {
-            images: prev.images ? [...prev.images, ...response.hits] : response.hits,
-          loadMore: page < Math.ceil(response.totalHits / 12),
-        };
-      });
+      setImages(prev => prev ? [...prev, ...response.hits] : response.hits)
+      setLoadMore(page < Math.ceil(response.totalHits / 12))
+     
     } catch (error) {
-      this.setState({ error: error.message });
+      setError(error.message)
+     
     } finally {
-      this.setState({ isLoading: false });
+      setIsLoading(false)
     }
   };
   
  
 
-   handleLoadMore = () => {
-    this.setState((prev)=>({page: prev.page +1}))
+  const handleLoadMore = () => {
+    setPage(prev=> prev +1)
   }
 
-    onHandleSubmit = value => {
-    this.setState({ query: value, page: 1, images: null });
+  const onHandleSubmit = value => {
+    setQuery(value)
+    setPage(1)
+    setImages(null)
   };
 
-  render() {
-    const { isLoading, error, loadMore } = this.state
-    
-    return (
+  return (
       <>
-        <Searchbar onSubmit={this.onHandleSubmit}>
+        <Searchbar onSubmit={onHandleSubmit}>
 <IoSearch />
 
         </Searchbar>
           {isLoading && <Loader />}
            {error && <h2>{error}</h2>}
           
-        <ImageGallery > {this.state.images && this.state.images.map((elem) => <ImageGalleryItem key={elem.id} webformatURL={elem.webformatURL} alt={elem.tags} openModal={()=> this.openModal(elem.largeImageURL, elem.tags) } />)}
+        <ImageGallery > {images && images.map((elem) => <ImageGalleryItem key={elem.id} webformatURL={elem.webformatURL} alt={elem.tags} openModal={()=> openModal(elem.largeImageURL, elem.tags) } />)}
         </ImageGallery>
-        <MyModal modalIsOpen={this.state.isShownModal}
-          closeModal={this.closeModal}
-          largeImg={this.state.largeImg}
-          tags={this.state.tags} />
-        {loadMore && <Button handleLoadMore={this.handleLoadMore} />}
+        <MyModal modalIsOpen={isShownModal}
+          closeModal={closeModal}
+          largeImg={largeImg}
+          tags={tags} />
+        {loadMore && <Button handleLoadMore={handleLoadMore} />}
       
       </>
     )
-  }
 }
