@@ -21,23 +21,8 @@ export const App = () => {
 
 
   useEffect(() => {
-    if(query) getImages(query, page)
-  }, [query, page])
- 
 
-  const openModal = (largeImg, tags) => {
-    setIsShowModal(true)
-    setLargeImg(largeImg)
-    setTags(tags)
-  }
-
-  const closeModal = () => {
-     setIsShowModal(false)
-    setLargeImg('')
-    setTags('')
-  }
-
-  const getImages = async (query, page) => {
+    const getImages = async (query, page) => {
       setIsLoading(true)
     try {
       const response = await getAllImages(query, page);
@@ -54,6 +39,23 @@ export const App = () => {
       setIsLoading(false)
     }
   };
+    if(query) getImages(query, page)
+  }, [query, page])
+ 
+
+  const openModal = (largeImg, tags) => {
+    setIsShowModal(true)
+    setLargeImg(largeImg)
+    setTags(tags)
+  }
+
+  const closeModal = () => {
+     setIsShowModal(false)
+    setLargeImg('')
+    setTags('')
+  }
+
+  
   
  
 
