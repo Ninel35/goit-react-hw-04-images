@@ -55,10 +55,6 @@ export const App = () => {
     setTags('')
   }
 
-  
-  
- 
-
   const handleLoadMore = () => {
     setPage(prev=> prev +1)
   }
