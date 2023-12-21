@@ -6,7 +6,7 @@ import { ImageGallery } from "./ImageGallery";
 import { MyModal } from "./Modal";
 import { Button } from "./Button";
 import { ImageGalleryItem } from "./ImageGalleryItem";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 export const App = () => {
   const [query, setQuery] = useState('')
@@ -20,9 +20,7 @@ export const App = () => {
   const [isShownModal, setIsShowModal] = useState(false)
 
 
-  useEffect(() => {
-
-    const getImages = async (query, page) => {
+    const getImages = useCallback( async (query, page) => {
       setIsLoading(true)
     try {
       const response = await getAllImages(query, page);
@@ -38,9 +36,15 @@ export const App = () => {
     } finally {
       setIsLoading(false)
     }
-  };
-    if(query) getImages(query, page)
+    },[query, page])
+
+
+
+  useEffect(() => {
+     if(query) getImages(query, page)
   }, [query, page])
+
+  
  
 
   const openModal = (largeImg, tags) => {
@@ -68,7 +72,7 @@ export const App = () => {
   return (
       <>
         <Searchbar onSubmit={onHandleSubmit}>
-<IoSearch />
+          <IoSearch />
 
         </Searchbar>
           {isLoading && <Loader />}
