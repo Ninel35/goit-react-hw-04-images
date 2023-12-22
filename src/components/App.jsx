@@ -5,7 +5,6 @@ import { IoSearch } from "react-icons/io5";
 import { ImageGallery } from "./ImageGallery";
 import { MyModal } from "./Modal";
 import { Button } from "./Button";
-import { ImageGalleryItem } from "./ImageGalleryItem";
 import { useCallback, useEffect, useState } from "react";
 
 export const App = () => {
@@ -36,13 +35,13 @@ export const App = () => {
     } finally {
       setIsLoading(false)
     }
-    },[query, page])
+    },[])
 
 
 
   useEffect(() => {
      if(query) getImages(query, page)
-  }, [query, page])
+  }, [query, page, getImages])
 
   
  
@@ -78,8 +77,7 @@ export const App = () => {
           {isLoading && <Loader />}
            {error && <h2>{error}</h2>}
           
-        <ImageGallery > {images && images.map((elem) => <ImageGalleryItem key={elem.id} webformatURL={elem.webformatURL} alt={elem.tags} openModal={()=> openModal(elem.largeImageURL, elem.tags) } />)}
-        </ImageGallery>
+      <ImageGallery images={images} openModal={openModal} />
         <MyModal modalIsOpen={isShownModal}
           closeModal={closeModal}
           largeImg={largeImg}
